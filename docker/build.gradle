@@ -1,0 +1,30 @@
+//
+// cleaing the existing image first will delete all the layers resulting in more work, have build delete 
+//
+// gradle clean build is used a lot for java code and while the same should apply here, deciding to 
+// not do a clean ahead of time.
+//
+task clean(type: Exec) {
+  ignoreExitValue = true
+  //commandLine 'docker', 'rmi', "ks101_app:latest"
+  commandLine 'echo', 'not cleaning'
+}
+
+task build(type: Exec) {
+    inputs.files 'Dockerfile'
+    commandLine 'docker', 'build', '-t', "ks101_app:latest", '.'
+
+    doFirst {
+        exec {
+            ignoreExitValue = true
+            commandLine 'docker', 'tag', "ks101_app:latest", "ks101_app:prev"
+        }
+    }
+
+    doLast {
+        exec {
+            ignoreExitValue = true
+            commandLine 'docker', 'rmi', "ks101_app:prev"
+        }
+    }
+}

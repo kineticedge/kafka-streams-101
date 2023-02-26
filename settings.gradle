@@ -1,0 +1,17 @@
+rootProject.name = 'kafka-streams-101'
+
+buildscript {
+	repositories {
+		mavenCentral()
+	}
+	dependencies {
+	}
+}
+
+include 'domain'
+include 'common'
+include 'admin'
+include 'producer'
+include 'consumer'
+include 'streams'
+include 'docker'
