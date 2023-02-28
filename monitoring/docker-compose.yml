@@ -34,7 +34,8 @@ services:
     volumes:
       - prometheus:/prometheus
       - ./prometheus/prometheus.yml:/etc/prometheus/prometheus.yml
-      - ./prometheus/application_streams.json:/etc/prometheus/application_streams.json
+      - ./prometheus/application_phone_validator.json:/etc/prometheus/application_phone_validator.json
+      - ./prometheus/application_customer360.json:/etc/prometheus/application_customer360.json
 
   grafana:
     image: grafana/grafana:main

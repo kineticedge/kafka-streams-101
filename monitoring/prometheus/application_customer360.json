@@ -1,0 +1,15 @@
+[
+  {
+    "targets": [
+      "ks101a-streams-customer360-1:7071",
+      "ks101a-streams-customer360-2:7071",
+      "ks101a-streams-customer360-3:7071",
+      "ks101a-streams-customer360-4:7071"
+    ],
+    "labels": {
+      "job": "streams-customer360",
+      "cluster_type": "streams",
+      "cluster_id": "streams-customer-360"
+    }
+  }
+]

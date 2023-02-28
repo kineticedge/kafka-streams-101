@@ -33,6 +33,9 @@ kt --create --replication-factor 3 --partitions 4 --topic names --if-not-exists
 kt --create --replication-factor 3 --partitions 4 --topic emails --if-not-exists
 kt --create --replication-factor 3 --partitions 4 --topic phones --if-not-exists
 kt --create --replication-factor 3 --partitions 4 --topic customers360 --if-not-exists
+kt --create --replication-factor 3 --partitions 4 --topic duplicate-phones --if-not-exists
+kt --create --if-not-exists --replication-factor 3 --partitions 4 --topic duplicate-phones-groupByPhoneNumber-repartition
+
 
 (cd applications; docker-compose up -d)
 (cd monitoring; docker-compose up -d)

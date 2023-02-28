@@ -1,0 +1,15 @@
+[
+  {
+    "targets": [
+      "ks101a-streams-phone-validator-1:7071",
+      "ks101a-streams-phone-validator-2:7071",
+      "ks101a-streams-phone-validator-3:7071",
+      "ks101a-streams-phone-validator-4:7071"
+    ],
+    "labels": {
+      "job": "streams-phone-validator",
+      "cluster_type": "streams",
+      "cluster_id": "streams-phone-validator"
+    }
+  }
+]
