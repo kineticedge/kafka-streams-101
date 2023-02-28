@@ -1,5 +1,7 @@
 package io.kineticedge.ks101.streams;
 
+import io.kineticedge.ks101.common.streams.KafkaStreamsConfigUtil;
+import io.kineticedge.ks101.common.streams.ShutdownHook;
 import io.kineticedge.ks101.common.util.KafkaEnvUtil;
 import io.kineticedge.ks101.common.util.PropertiesUtil;
 import io.kineticedge.ks101.domain.*;
@@ -39,56 +41,9 @@ import java.util.stream.Collectors;
 public class Streams {
 
 
-    private static final Duration SHUTDOWN = Duration.ofSeconds(30);
-
     private Map<String, Object> properties(final Options options) {
-
-        final Map<String, Object> defaults = Map.ofEntries(
-                Map.entry(ProducerConfig.LINGER_MS_CONFIG, 100),
-                // Map.entry(StreamsConfig.NUM_STANDBY_REPLICAS_CONFIG, 2);
-                Map.entry(StreamsConfig.BOOTSTRAP_SERVERS_CONFIG, options.getBootstrapServers()),
-                Map.entry(StreamsConfig.SECURITY_PROTOCOL_CONFIG, "PLAINTEXT"),
-                Map.entry(StreamsConfig.DEFAULT_KEY_SERDE_CLASS_CONFIG, Serdes.StringSerde.class.getName()),
-                Map.entry(StreamsConfig.DEFAULT_VALUE_SERDE_CLASS_CONFIG, JsonSerde.class.getName()),
-                Map.entry(StreamsConfig.APPLICATION_ID_CONFIG, options.getApplicationId()),
-                Map.entry(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, options.getAutoOffsetReset()),
-                Map.entry(StreamsConfig.COMMIT_INTERVAL_MS_CONFIG, 100),
-                //Map.entry(CommonClientConfigs.SESSION_TIMEOUT_MS_CONFIG, 10_000),
-                Map.entry(StreamsConfig.CLIENT_ID_CONFIG, options.getClientId()),
-                Map.entry(StreamsConfig.DEFAULT_DESERIALIZATION_EXCEPTION_HANDLER_CLASS_CONFIG, LogAndContinueExceptionHandler.class),
-                Map.entry(StreamsConfig.TOPOLOGY_OPTIMIZATION_CONFIG, StreamsConfig.OPTIMIZE),
-                Map.entry(StreamsConfig.METRICS_RECORDING_LEVEL_CONFIG, "DEBUG"),
-                Map.entry(StreamsConfig.NUM_STREAM_THREADS_CONFIG, 2)
-        );
-
-
-        final Map<String, Object> map = new HashMap<>(defaults);
-
-        //
-        // If set the consumer is treated as a static member; this ID must be unique for every member in the group.
-        //
-        // * if you look at docker/entrypoint.sh it uses the numerical value within docker to ensure a uniqe instance.
-        //
-        // * if you are running stand-alone, you need to set this uniquely for every instance you plan on running.
-        //
-        if (options.getGroupInstanceId() != null) {
-            map.put(CommonClientConfigs.GROUP_INSTANCE_ID_CONFIG, options.getGroupInstanceId());
-        }
-
-        // Kafka Stream settings in the property files take priority.
-        //
-        // This needs to be relative path to allow for local-development to use it as well, in docker container
-        // this needs to be added to the /app directory as that is the working dir.
-        //
-        map.putAll(PropertiesUtil.load("./app.properties"));
-
-        // environment wins
-        map.putAll(KafkaEnvUtil.to("STREAMS_"));
-
-
-        return map;
+        return KafkaStreamsConfigUtil.properties(options.getBootstrapServers(), options.getApplicationId());
     }
-
 
     public void start(final Options options) {
 
@@ -109,34 +64,7 @@ public class Streams {
 
         streams.start();
 
-        Runtime.getRuntime().addShutdownHook(new Thread(() -> {
-            log.info("Runtime shutdown hook, state={}", streams.state());
-            if (streams.state().isRunningOrRebalancing()) {
-
-                // New to Kafka Streams 3.3, you can have the application leave the group on shutting down (when member.id / static membership is used).
-                //
-                // There are reasons to do this and not to do it; from a development standpoint this makes starting/stopping
-                // the application a lot easier reducing the time needed to rejoin the group.
-                boolean leaveGroup = true;
-
-                log.info("closing KafkaStreams with leaveGroup={}", leaveGroup);
-
-                KafkaStreams.CloseOptions closeOptions = new KafkaStreams.CloseOptions().timeout(SHUTDOWN).leaveGroup(leaveGroup);
-
-                boolean isClean = streams.close(closeOptions);
-                if (!isClean) {
-                    System.out.println("KafkaStreams was not closed cleanly");
-                }
-
-            } else if (streams.state().isShuttingDown()) {
-                log.info("Kafka Streams is already shutting down with state={}, will wait {} to ensure proper shutdown.", streams.state(), SHUTDOWN);
-                boolean isClean = streams.close(SHUTDOWN);
-                if (!isClean) {
-                    System.out.println("KafkaStreams was not closed cleanly");
-                }
-                System.out.println("final KafkaStreams state=" + streams.state());
-            }
-        }));
+        Runtime.getRuntime().addShutdownHook(new Thread(new ShutdownHook(streams)));
 
     }
 

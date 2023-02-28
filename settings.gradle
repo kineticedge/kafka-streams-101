@@ -10,6 +10,7 @@ buildscript {
 
 include 'domain'
 include 'common'
+include 'common-streams'
 include 'admin'
 include 'producer'
 include 'consumer'

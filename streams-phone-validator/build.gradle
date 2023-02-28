@@ -4,6 +4,7 @@ apply plugin: 'distribution'
 dependencies {
     implementation project(':domain')
     implementation project(':common')
+    implementation project(':common-streams')
     implementation group: 'org.apache.kafka', name: 'kafka-streams', version: kafka_version
 }
 
