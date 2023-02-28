@@ -1,7 +1,7 @@
 networks:
   default:
     external: true
-    name: ksd
+    name: ks101
 
 volumes:
   prometheus: {}
@@ -35,7 +35,6 @@ services:
       - prometheus:/prometheus
       - ./prometheus/prometheus.yml:/etc/prometheus/prometheus.yml
       - ./prometheus/application_streams.json:/etc/prometheus/application_streams.json
-      - ./prometheus/application_analytics.json:/etc/prometheus/application_analytics.json
 
   grafana:
     image: grafana/grafana:main

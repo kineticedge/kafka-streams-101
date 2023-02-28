@@ -21,7 +21,9 @@ COPY ./jmx-exporter-config.yml ./entrypoint.sh ./healthcheck-streams.sh ./health
 
 COPY --from=build /jmx_prometheus_javaagent.jar /jolokia-agent.jar /
 
-#VOLUME /app
+# an optional step, but by putting the 50MB rocksdb jar into the image, greatly improves startup time as it doesn't have to be
+# extracted from the tar file, also improve build times.
+COPY ./build/runtime /dependencies
 
 EXPOSE 7071/tcp 7072/tcp 8080/tcp
 

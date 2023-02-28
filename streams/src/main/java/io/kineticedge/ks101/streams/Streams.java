@@ -1,5 +1,7 @@
 package io.kineticedge.ks101.streams;
 
+import io.kineticedge.ks101.common.util.KafkaEnvUtil;
+import io.kineticedge.ks101.common.util.PropertiesUtil;
 import io.kineticedge.ks101.domain.*;
 import io.kineticedge.ks101.event.*;
 import io.kineticedge.ks101.consumer.serde.JsonSerde;
@@ -73,18 +75,16 @@ public class Streams {
             map.put(CommonClientConfigs.GROUP_INSTANCE_ID_CONFIG, options.getGroupInstanceId());
         }
 
+        // Kafka Stream settings in the property files take priority.
+        //
+        // This needs to be relative path to allow for local-development to use it as well, in docker container
+        // this needs to be added to the /app directory as that is the working dir.
+        //
+        map.putAll(PropertiesUtil.load("./app.properties"));
 
-        try {
-            final Properties properties = new Properties();
-            final File file = new File("./streams.properties");
-            if (file.exists() && file.isFile()) {
-                log.info("applying streams.properties");
-                properties.load(new FileInputStream(file));
-                map.putAll(properties.entrySet().stream().collect(Collectors.toMap(e -> e.getKey().toString(), Map.Entry::getValue)));
-            }
-        } catch (final IOException e) {
-            log.info("no streams.properties override file found");
-        }
+        // environment wins
+        map.putAll(KafkaEnvUtil.to("STREAMS_"));
+
 
         return map;
     }

@@ -1,16 +1,24 @@
-//
-// cleaing the existing image first will delete all the layers resulting in more work, have build delete 
-//
-// gradle clean build is used a lot for java code and while the same should apply here, deciding to 
-// not do a clean ahead of time.
-//
-task clean(type: Exec) {
-  ignoreExitValue = true
-  //commandLine 'docker', 'rmi', "ks101_app:latest"
-  commandLine 'echo', 'not cleaning'
+apply plugin: 'java'
+
+// putting dependencies into the docker image to minimize startup time.
+dependencies {
+    implementation group: 'org.apache.kafka', name: 'kafka-clients', version: kafka_version
+    implementation group: 'org.apache.kafka', name: 'kafka-streams', version: kafka_version
 }
 
-task build(type: Exec) {
+task extractDependencies(type: Copy) {
+    from sourceSets.main.runtimeClasspath
+    into 'build/runtime/'
+}
+
+task dockerBuild(type: Exec) {
+    outputs.upToDateWhen {
+        if (project.hasProperty('force-docker')) {
+            return false
+        } else {
+            return true
+        }
+    }
     inputs.files 'Dockerfile'
     commandLine 'docker', 'build', '-t', "ks101_app:latest", '.'
 
@@ -28,3 +36,6 @@ task build(type: Exec) {
         }
     }
 }
+
+build.finalizedBy extractDependencies
+build.finalizedBy dockerBuild
