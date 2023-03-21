@@ -19,13 +19,6 @@ public class ServletDeployment {
 
     private static final int PORT = 8080;
 
-//    private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper()
-//            .setTimeZone(TimeZone.getDefault())
-//            .setSerializationInclusion(JsonInclude.Include.NON_NULL)
-//            .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
-//            .configure(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS, false)
-//            .registerModule(new JavaTimeModule());
-
     private Undertow server;
 
     private Admin admin;

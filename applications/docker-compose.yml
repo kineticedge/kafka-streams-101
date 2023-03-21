@@ -19,6 +19,7 @@ services:
     volumes:
       - ./admin-1.0.tar:/app.tar
       - ./streams.properties:/app.properties
+      - ./connection.properties:/mnt/secrets/connection.properties
     environment:
       BOOTSTRAP_SERVERS: broker-1:9092,broker-2:9092,broker-3:9092
 
@@ -35,6 +36,7 @@ services:
       replicas: 2
     volumes:
       - ./producer-1.0.tar:/app.tar
+      - ./connection.properties:/mnt/secrets/connection.properties
     environment:
       BOOTSTRAP_SERVERS: broker-1:9092,broker-2:9092,broker-3:9092
 
@@ -51,6 +53,7 @@ services:
       replicas: 2
     volumes:
       - ./streams-customer360-1.0.tar:/app.tar
+      - ./connection.properties:/mnt/secrets/connection.properties
     environment:
       BOOTSTRAP_SERVERS: broker-1:9092,broker-2:9092,broker-3:9092
       #STREAMS_STATE_DIR: /STATE_STORE_DIRECTORY
@@ -68,6 +71,7 @@ services:
       replicas: 2
     volumes:
       - ./streams-phone-validator-1.0.tar:/app.tar
+      - ./connection.properties:/mnt/secrets/connection.properties
     environment:
       BOOTSTRAP_SERVERS: broker-1:9092,broker-2:9092,broker-3:9092
   
@@ -84,6 +88,7 @@ services:
       replicas: 2
     volumes:
       - ./consumer-1.0.tar:/app.tar
+      - ./connection.properties:/mnt/secrets/connection.properties
     environment:
       BOOTSTRAP_SERVERS: broker-1:9092,broker-2:9092,broker-3:9092
 

@@ -7,7 +7,6 @@ import org.apache.kafka.clients.consumer.ConsumerConfig;
 import org.apache.kafka.clients.producer.ProducerConfig;
 import org.apache.kafka.common.serialization.Serdes;
 import org.apache.kafka.streams.StreamsConfig;
-import org.apache.kafka.streams.errors.LogAndContinueExceptionHandler;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -18,14 +17,16 @@ public class KafkaStreamsConfigUtil {
 
         final Map<String, Object> defaults = Map.ofEntries(
                 Map.entry(ProducerConfig.LINGER_MS_CONFIG, 100),
-                Map.entry(StreamsConfig.BOOTSTRAP_SERVERS_CONFIG, bootstrapServer),
-                Map.entry(StreamsConfig.SECURITY_PROTOCOL_CONFIG, "PLAINTEXT"),
+//                Map.entry(StreamsConfig.BOOTSTRAP_SERVERS_CONFIG, bootstrapServer),
+//                Map.entry(StreamsConfig.SECURITY_PROTOCOL_CONFIG, "PLAINTEXT"),
                 Map.entry(StreamsConfig.DEFAULT_KEY_SERDE_CLASS_CONFIG, Serdes.StringSerde.class.getName()),
                 Map.entry(StreamsConfig.DEFAULT_VALUE_SERDE_CLASS_CONFIG, JsonSerde.class.getName()),
                 Map.entry(StreamsConfig.APPLICATION_ID_CONFIG, applicationId),
                 Map.entry(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "earliest"),
                 Map.entry(StreamsConfig.COMMIT_INTERVAL_MS_CONFIG, 100),
-                Map.entry(StreamsConfig.DEFAULT_DESERIALIZATION_EXCEPTION_HANDLER_CLASS_CONFIG, LogAndContinueExceptionHandler.class),
+               //Map.entry(StreamsConfig.DEFAULT_DESERIALIZATION_EXCEPTION_HANDLER_CLASS_CONFIG, LogAndContinueExceptionHandler.class),
+                Map.entry(StreamsConfig.DEFAULT_DESERIALIZATION_EXCEPTION_HANDLER_CLASS_CONFIG, ThrottlingDeserializationExceptionHandler.class),
+                Map.entry(ThrottlingDeserializationExceptionHandler.THROTTLING_DESERIALIZATION_EXCEPTION_THRESHOLD, ".1"),
                 Map.entry(StreamsConfig.TOPOLOGY_OPTIMIZATION_CONFIG, StreamsConfig.OPTIMIZE),
                 Map.entry(StreamsConfig.METRICS_RECORDING_LEVEL_CONFIG, "DEBUG"),
                 Map.entry(StreamsConfig.NUM_STREAM_THREADS_CONFIG, 2)
@@ -42,6 +43,19 @@ public class KafkaStreamsConfigUtil {
 
         // environment wins
         map.putAll(KafkaEnvUtil.to("STREAMS_"));
+
+        // Load in the connection settings at the end from a property file. Do not try to build `sasl.jaas.config`,
+        // instead set the entire string -- less work than building in the means to add username/password and
+        // allows for changing from sasl PLAIN to OAUTHBEARER w/out any coding changes, just all within these properties.
+        //
+        // bootstrap.servers=broker-1:9092,broker-2:9092
+        // security.protocols=SASL_SSL
+        // sasl.mechanism=PLAIN
+        // sasl.jaas.config=org.apache.kafka.common.security.plain.PlainLoginModule required username="kafka-admin" password="kafka-admin-secret";
+        // ssl.truststore.location=/mnt/secrets/truststore.jks
+        // ssl.truststore.password=truststore_secret
+        //
+        map.putAll(PropertiesUtil.load("/mnt/secrets/connection.properties"));
 
         return map;
     }

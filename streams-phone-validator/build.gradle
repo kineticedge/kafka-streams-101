@@ -10,11 +10,5 @@ dependencies {
 
 application {
     mainClass = "io.kineticedge.ks101.streams.Main"
-    //applicationDefaultJvmArgs = ['-javaagent:./jmx_prometheus/jmx_prometheus_javaagent.jar=7071:./docker/streams-config.yml']
-}
-
-task getDeps(type: Copy) {
-  from sourceSets.main.runtimeClasspath
-  into 'runtime/'
 }
 

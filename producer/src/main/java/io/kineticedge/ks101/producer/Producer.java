@@ -1,5 +1,6 @@
 package io.kineticedge.ks101.producer;
 
+import io.kineticedge.ks101.common.util.PropertiesUtil;
 import io.kineticedge.ks101.event.CustomerEvent;
 import io.kineticedge.ks101.consumer.serde.JsonSerializer;
 import lombok.extern.slf4j.Slf4j;
@@ -54,6 +55,8 @@ public class Producer {
         );
 
         Map<String, Object> map = new HashMap<>(defaults);
+
+        map.putAll(PropertiesUtil.load("/mnt/secrets/connection.properties"));
 
         return map;
     }

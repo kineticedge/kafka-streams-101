@@ -48,9 +48,9 @@ public class Streams {
             return StreamsUncaughtExceptionHandler.StreamThreadExceptionResponse.SHUTDOWN_APPLICATION;
         });
 
-        streams.start();
+            streams.start();
 
-        Runtime.getRuntime().addShutdownHook(new Thread(new ShutdownHook(streams)));
+            Runtime.getRuntime().addShutdownHook(new Thread(new ShutdownHook(streams)));
     }
 
     private StreamsBuilder streamsBuilder(final Options options) {
@@ -92,9 +92,11 @@ public class Streams {
                 )
                 .toStream(Named.as("toStream"))
                 .peek((k, v) -> log.debug("key={}, value={}", k, v), Named.as("peek-out"))
-                .filter((k, v) -> v.size() > 1)
+                .filter((k, v) -> v.size() > 1, Named.as("phone-exists-in-multiple"))
                 .peek((k, v) -> log.debug("key={}, value={}", k, v), Named.as("peek-out-filtered"))
-                .to(options.getDuplicatePhonesTopic(), Produced.<String, List<String>>with(null, listSerde));
+                .to(options.getDuplicatePhonesTopic(), Produced.<String, List<String>>as("emit-to-duplicate-phones").withValueSerde(listSerde));
+
+
 
         return builder;
     }

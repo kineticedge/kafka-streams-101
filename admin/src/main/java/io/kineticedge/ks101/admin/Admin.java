@@ -1,6 +1,7 @@
 package io.kineticedge.ks101.admin;
 
 
+import io.kineticedge.ks101.common.util.PropertiesUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.kafka.clients.CommonClientConfigs;
 import org.apache.kafka.clients.admin.AdminClient;
@@ -65,6 +66,8 @@ public class Admin {
         );
 
         Map<String, Object> map = new HashMap<>(defaults);
+
+        map.putAll(PropertiesUtil.load("/mnt/secrets/connection.properties"));
 
         return map;
     }

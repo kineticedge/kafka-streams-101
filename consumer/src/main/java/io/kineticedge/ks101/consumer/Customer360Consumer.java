@@ -1,20 +1,16 @@
 package io.kineticedge.ks101.consumer;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import io.kineticedge.ks101.common.util.PropertiesUtil;
 import io.kineticedge.ks101.consumer.serde.JsonDeserializer;
 import io.kineticedge.ks101.domain.Customer360;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.kafka.clients.CommonClientConfigs;
-import org.apache.kafka.clients.consumer.ConsumerConfig;
-import org.apache.kafka.clients.consumer.ConsumerRecord;
-import org.apache.kafka.clients.consumer.ConsumerRecords;
-import org.apache.kafka.clients.consumer.KafkaConsumer;
+import org.apache.kafka.clients.consumer.*;
+import org.apache.kafka.common.TopicPartition;
 import org.apache.kafka.common.serialization.StringDeserializer;
 
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Properties;
+import java.util.*;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 
@@ -22,17 +18,6 @@ import static io.kineticedge.ks101.common.util.JsonUtil.objectMapper;
 
 @Slf4j
 public class Customer360Consumer {
-
-//    private static final ObjectMapper OBJECT_MAPPER =
-//            new ObjectMapper()
-//                    .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
-//                    .setTimeZone(TimeZone.getDefault())
-//                    .registerModule(new JavaTimeModule())
-//                    .registerModule(new SimpleModule("instant-module", new Version(1, 0, 0, null, "", ""))
-//                            .addSerializer(Instant.class, new InstantSerializer())
-//                            .addDeserializer(Instant.class, new InstantDeserializer())
-//                    )
-//            ;
 
     private final Options options;
 
@@ -58,7 +43,16 @@ public class Customer360Consumer {
 
     public void consume() {
 
-        kafkaConsumer.subscribe(Collections.singleton(options.getCustomer360Topic()));
+        kafkaConsumer.subscribe(Collections.singleton(options.getCustomer360Topic()), new ConsumerRebalanceListener() {
+            @Override
+            public void onPartitionsRevoked(Collection<TopicPartition> collection) {
+                kafkaConsumer.commitSync();
+            }
+
+            @Override
+            public void onPartitionsAssigned(Collection<TopicPartition> collection) {
+            }
+        });
 
         while (run) {
             final ConsumerRecords<String, Customer360> records = kafkaConsumer.poll(options.getPollDuration());
@@ -87,6 +81,8 @@ public class Customer360Consumer {
         );
 
         Map<String, Object> map = new HashMap<>(defaults);
+
+        map.putAll(PropertiesUtil.load("/mnt/secrets/connection.properties"));
 
         return map;
     }
