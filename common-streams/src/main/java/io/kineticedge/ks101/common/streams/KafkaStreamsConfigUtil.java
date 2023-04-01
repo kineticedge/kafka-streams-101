@@ -3,6 +3,7 @@ package io.kineticedge.ks101.common.streams;
 import io.kineticedge.ks101.common.util.KafkaEnvUtil;
 import io.kineticedge.ks101.common.util.PropertiesUtil;
 import io.kineticedge.ks101.consumer.serde.JsonSerde;
+import org.apache.kafka.clients.CommonClientConfigs;
 import org.apache.kafka.clients.consumer.ConsumerConfig;
 import org.apache.kafka.clients.producer.ProducerConfig;
 import org.apache.kafka.common.serialization.Serdes;
@@ -29,7 +30,10 @@ public class KafkaStreamsConfigUtil {
                 Map.entry(ThrottlingDeserializationExceptionHandler.THROTTLING_DESERIALIZATION_EXCEPTION_THRESHOLD, ".1"),
                 Map.entry(StreamsConfig.TOPOLOGY_OPTIMIZATION_CONFIG, StreamsConfig.OPTIMIZE),
                 Map.entry(StreamsConfig.METRICS_RECORDING_LEVEL_CONFIG, "DEBUG"),
-                Map.entry(StreamsConfig.NUM_STREAM_THREADS_CONFIG, 2)
+                Map.entry(StreamsConfig.NUM_STREAM_THREADS_CONFIG, 1)
+                //Map.entry(CommonClientConfigs.SESSION_TIMEOUT_MS_CONFIG, 7_000),
+                //Map.entry(CommonClientConfigs.HEARTBEAT_INTERVAL_MS_CONFIG, 3_000),
+                //Map.entry(CommonClientConfigs.MAX_POLL_INTERVAL_MS_CONFIG, 20_000)
         );
 
         final Map<String, Object> map = new HashMap<>(defaults);

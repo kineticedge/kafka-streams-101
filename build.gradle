@@ -33,14 +33,6 @@ configure(subprojects.findAll { project -> file("${project.name}/src/main/java")
     sourceCompatibility = JavaVersion.VERSION_14
     targetCompatibility = JavaVersion.VERSION_14
 
-    idea {
-        module {
-            inheritOutputDirs = false
-            outputDir = compileJava.destinationDir
-            testOutputDir = compileTestJava.destinationDir
-        }
-    }
-
     dependencies {
 
         implementation group: 'ch.qos.logback', name: 'logback-classic', version: logback_version

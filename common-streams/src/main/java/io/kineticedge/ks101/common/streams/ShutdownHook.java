@@ -32,6 +32,8 @@ public class ShutdownHook implements Runnable {
 
             log.info("closing KafkaStreams with leaveGroup={}", leaveGroup);
 
+            // can I interrupt the thread....
+
             KafkaStreams.CloseOptions closeOptions = new KafkaStreams.CloseOptions().timeout(SHUTDOWN).leaveGroup(leaveGroup);
 
             boolean isClean = streams.close(closeOptions);

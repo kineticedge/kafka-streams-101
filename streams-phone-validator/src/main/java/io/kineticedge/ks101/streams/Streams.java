@@ -53,6 +53,7 @@ public class Streams {
             Runtime.getRuntime().addShutdownHook(new Thread(new ShutdownHook(streams)));
     }
 
+    @SuppressWarnings("unchecked")
     private StreamsBuilder streamsBuilder(final Options options) {
 
         final var builder = new StreamsBuilder();
