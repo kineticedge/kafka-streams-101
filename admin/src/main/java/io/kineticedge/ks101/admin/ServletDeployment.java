@@ -10,6 +10,7 @@ import io.undertow.servlet.api.DeploymentInfo;
 import io.undertow.servlet.api.DeploymentManager;
 import io.undertow.util.Headers;
 import io.undertow.util.StatusCodes;
+import org.apache.commons.lang3.tuple.Pair;
 
 import java.util.Map;
 
@@ -42,7 +43,7 @@ public class ServletDeployment {
 
         routingHandler
                 .add("GET", "/topics", new BlockingHandler(exchange -> {
-                            final Map<String, Map<String, Object>> result = admin.topics();
+                            final Map<String, Pair<Integer, Map<String, Object>>> result = admin.topics();
                             exchange.getResponseHeaders().put(Headers.CONTENT_TYPE, "application/json");
                             exchange.setStatusCode(StatusCodes.ACCEPTED);
                             exchange.getResponseSender().send(format(result));
@@ -57,7 +58,7 @@ public class ServletDeployment {
     }
 
 
-    private String format(final Map<String, Map<String, Object>> result) {
+    private String format(final Map<String, Pair<Integer, Map<String, Object>>> result) {
         try {
             return objectMapper().writerWithDefaultPrettyPrinter().writeValueAsString(result) + "\n";
         } catch (final JsonProcessingException e) {
